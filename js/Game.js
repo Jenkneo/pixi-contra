@@ -69,4 +69,36 @@ export default class Game{
       return true;
     }
   }
+
+  onKeyDown(key){
+    const LEFT = 37;
+    const UP = 38;
+    const RIGHT = 39;
+    const DOWN = 40;
+    const A = 65;
+    const S = 83;
+
+    if(key.keyCode == LEFT){
+      this.#hero.startLeftMove();
+    }
+    if(key.keyCode == RIGHT){
+      this.#hero.startRightMove();
+    }
+  }
+
+  onKeyUp(key){
+    const LEFT = 37;
+    const UP = 38;
+    const RIGHT = 39;
+    const DOWN = 40;
+    const A = 65;
+    const S = 83;
+
+    if(key.keyCode == LEFT){
+      this.#hero.stopLeftMove();
+    }
+    if(key.keyCode == RIGHT){
+      this.#hero.stopRightMove();
+    }
+  }
 }
