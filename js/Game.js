@@ -1,11 +1,15 @@
 import Hero from "./entities/Hero";
-import Platform from "./entities/Platform";
+import Platform from "./entities/Platforms/Platform";
+import KeyboardProcessor from "./KeyboardProcessor";
+import PlatformFactory from "./entities/Platforms/PlatformFactory";
 
 export default class Game{
   
   #pixiApp;
   #hero;
   #platforms = [];
+
+  keyboardProcessor;
 
   constructor(pixiApp){
     this.#pixiApp = pixiApp;
@@ -15,23 +19,30 @@ export default class Game{
     this.#hero.y = 100;
     this.#pixiApp.stage.addChild(this.#hero)
 
-    const platform1 = new Platform();
-    platform1.x = 50;
-    platform1.y = 400;
-    this.#pixiApp.stage.addChild(platform1)
+    const platformFactory = new PlatformFactory(this.#pixiApp);
 
-    const platform2 = new Platform();
-    platform2.x = 200;
-    platform2.y = 450;
-    this.#pixiApp.stage.addChild(platform2)
+    this.#platforms.push(
+      platformFactory.createPlatform(50, 400), 
+      platformFactory.createPlatform(200, 450), 
+      platformFactory.createPlatform(400, 400)
+    )
 
-    const platform3 = new Platform();
-    platform3.x = 400;
-    platform3.y = 400;
-    this.#pixiApp.stage.addChild(platform3)
-
-    this.#platforms.push(platform1, platform2, platform3)
-    
+    this.keyboardProcessor = new KeyboardProcessor(this);
+    this.keyboardProcessor.getButton("KeyS").executeDown = function(){
+       this.#hero.jump()
+    };
+    this.keyboardProcessor.getButton("ArrowLeft").executeDown = function(){
+      this.#hero.startLeftMove()
+    };
+    this.keyboardProcessor.getButton("ArrowLeft").executeUp = function(){
+      this.#hero.stopLeftMove()
+    };
+    this.keyboardProcessor.getButton("ArrowRight").executeDown = function(){
+      this.#hero.startRightMove()
+    };
+    this.keyboardProcessor.getButton("ArrowRight").executeUp = function(){
+      this.#hero.stopRightMove()
+    };
   }
 
   update(){
@@ -43,22 +54,37 @@ export default class Game{
     this.#hero.update();
 
     for (let i = 0; i < this.#platforms.length; i++){
-      if (!this.isCollision(this.#hero, this.#platforms[i])){
-        continue;
-      }
-
-      const currY = this.#hero.y;
-      this.#hero.y = prevPoint.y;
-      if (!this.isCollision(this.#hero, this.#platforms[i])){
+      const collisionResult = this.getPlatformCollisionResult(this.#hero, this.#platforms[i], prevPoint)
+      if (collisionResult.vertical){
         this.#hero.stay();
-        continue;
       }
-
-      this.#hero.y = currY;
-      this.#hero.x = prevPoint.x;
     }
   }
 
+  getPlatformCollisionResult(character, platform, prevPoint){
+    const collisionResult = {
+      vertical: false,
+      horizontal: false,
+    }
+
+    if (!this.isCollision(character, platform)){
+      return collisionResult;
+    }
+
+    const currY = character.y;
+    character.y = prevPoint.y;
+    if (!this.isCollision(character, platform)){
+      character.stay();
+      collisionResult.vertical = true;
+      return collisionResult;
+    }
+
+    character.y = currY;
+    character.x = prevPoint.x;
+    collisionResult.horizontal = true;
+    return collisionResult;
+  }
+  
   isCollision(entity, area){
     if (
       entity.x < area.x + area.width &&
@@ -67,38 +93,6 @@ export default class Game{
       entity.y + entity.height > area.y
     ){
       return true;
-    }
-  }
-
-  onKeyDown(key){
-    const LEFT = 37;
-    const UP = 38;
-    const RIGHT = 39;
-    const DOWN = 40;
-    const A = 65;
-    const S = 83;
-
-    if(key.keyCode == LEFT){
-      this.#hero.startLeftMove();
-    }
-    if(key.keyCode == RIGHT){
-      this.#hero.startRightMove();
-    }
-  }
-
-  onKeyUp(key){
-    const LEFT = 37;
-    const UP = 38;
-    const RIGHT = 39;
-    const DOWN = 40;
-    const A = 65;
-    const S = 83;
-
-    if(key.keyCode == LEFT){
-      this.#hero.stopLeftMove();
-    }
-    if(key.keyCode == RIGHT){
-      this.#hero.stopRightMove();
     }
   }
 }

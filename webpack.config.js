@@ -5,7 +5,8 @@ module.exports = {
     index: './js/index.js',
     Game: './js/Game.js',
     Hero: './js/entities/Hero.js',
-    Platform: './js/entities/Platform.js',
+    Platform: './js/entities/Platforms/Platform.js',
+    PlatformFactory: './js/entities/Platforms/PlatformFactory.js',
   },
   output: { 
     path: path.resolve(__dirname, 'dist'),

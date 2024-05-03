@@ -1,9 +1,16 @@
 import { Container, Graphics } from "pixi.js";
 
+const States = {
+  Stay: "stay",
+  Jump: "jump",
+
+}
+
 export default class Hero extends Container{
 
   #GRAVITY_FORCE = 0.1;
   #MAX_SPEED = 2;
+  #JUMP_FORCE = 6;
   #velocityX = 0;
   #velocityY = 0;
 
@@ -16,6 +23,8 @@ export default class Hero extends Container{
     left: 0,
     right: 0,
   }
+
+  #state = States.Stay;
 
   constructor(){
     super();
@@ -37,12 +46,32 @@ export default class Hero extends Container{
 
   startLeftMove(){
     this.#directionContext.left = -1;
+
+    if(this.#directionContext.right > 0){
+      this.#movement.x = 0;
+      return;
+    }
+
     this.#movement.x = -1;
   }
 
   startRightMove(){
     this.#directionContext.right = 1;
+
+    if(this.#directionContext.left < 0){
+      this.#movement.x = 0;
+      return;
+    }
+
     this.#movement.x = 1;
+  }
+
+  jump(){
+    if (this.#state == States.Jump){
+      return;
+    }
+    this.#state = States.Jump;
+    this.#velocityY -= this.#JUMP_FORCE;
   }
 
   stopLeftMove(){
@@ -56,6 +85,7 @@ export default class Hero extends Container{
   }
 
   stay(){
+    this.#state = States.Stay
     this.#velocityY = 0
   }
 }
